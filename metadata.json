@@ -1,0 +1,6 @@
+{
+  "name": "Celebração de Aniversário - Experiência Cinematográfica",
+  "description": "Biosite premium e cinematográfico de aniversário com presente 3D interativo, abertura mágica, galeria de fotografias e telemensagem especial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
