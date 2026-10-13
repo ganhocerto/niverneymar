@@ -32,15 +32,15 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
 
     // --- Scene Setup ---
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a0103, 0.038);
+    scene.fog = new THREE.FogExp2(0x0a0103, 0.035);
 
     const width = container.clientWidth || window.innerWidth;
     const height = container.clientHeight || window.innerHeight;
     const isMobile = width < 768;
 
-    // Camera calibrated for compact, elegant 3D gift box framing (just like the screenshot)
-    const camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
-    camera.position.set(0, 0.75, isMobile ? 6.6 : 5.6);
+    // Clean perspective framing for a small, compact, grounded gift box
+    const camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 100);
+    camera.position.set(0, 0.6, isMobile ? 6.2 : 5.4);
     camera.lookAt(0, -0.05, 0);
 
     const renderer = new THREE.WebGLRenderer({
@@ -51,147 +51,137 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.2;
     container.appendChild(renderer.domElement);
 
-    // --- High-Fidelity Materials matching IMG_7599.png ---
-    // Deep Luxury Ruby Red Box Material with soft clearcoat
-    const redBoxMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x8C0D16,
-      roughness: 0.28,
-      metalness: 0.14,
-      clearcoat: 0.85,
-      clearcoatRoughness: 0.14,
-      reflectivity: 0.65,
-      emissive: 0x220205,
-      emissiveIntensity: 0.2,
+    // --- Solid, Fully Opaque Physical Materials ---
+    // Solid, rich ruby red box material (firm, opaque, physical)
+    const solidRedBoxMaterial = new THREE.MeshStandardMaterial({
+      color: 0x940D17,
+      roughness: 0.32,
+      metalness: 0.08,
+      emissive: 0x1c0205,
+      emissiveIntensity: 0.15,
     });
 
-    // Dark Obsidian / Golden Sheen Ribbon Material
-    const darkObsidianRibbon = new THREE.MeshPhysicalMaterial({
-      color: 0x14100D,
-      roughness: 0.18,
-      metalness: 0.88,
-      clearcoat: 0.95,
-      clearcoatRoughness: 0.08,
-      reflectivity: 0.85,
-      emissive: 0x181105,
-      emissiveIntensity: 0.18,
+    // Solid dark obsidian ribbon
+    const solidDarkRibbon = new THREE.MeshStandardMaterial({
+      color: 0x17120E,
+      roughness: 0.22,
+      metalness: 0.82,
+      emissive: 0x140E05,
+      emissiveIntensity: 0.15,
     });
 
-    // Golden Core Bead
-    const goldKnotMaterial = new THREE.MeshPhysicalMaterial({
+    // Solid polished gold center bead
+    const solidGoldKnot = new THREE.MeshStandardMaterial({
       color: 0xD4AF37,
       roughness: 0.18,
-      metalness: 0.92,
-      clearcoat: 0.95,
-      clearcoatRoughness: 0.08,
-      emissive: 0x3d2904,
-      emissiveIntensity: 0.35,
+      metalness: 0.9,
+      emissive: 0x362503,
+      emissiveIntensity: 0.25,
     });
 
-    // --- Main Compact 3D Gift Box Hierarchy ---
+    // --- Main Small 3D Gift Box Group ---
     const giftGroup = new THREE.Group();
     giftGroup.position.y = -0.05;
     scene.add(giftGroup);
 
-    // Compact, refined gift box dimensions (giving it the delicate, charming scale of the screenshot)
-    const boxW = 1.65;
-    const boxH = 1.45;
-    const boxD = 1.65;
-    const ribbonW = 0.28;
-    const ribbonThick = 0.014;
+    // Small, compact, solid dimensions
+    const boxW = 1.2;
+    const boxH = 1.05;
+    const boxD = 1.2;
+    const ribbonW = 0.2;
+    const ribbonThick = 0.012;
 
-    // 1. Box Base
+    // 1. Solid Box Base
     const baseGeom = new THREE.BoxGeometry(boxW, boxH, boxD);
-    const baseMesh = new THREE.Mesh(baseGeom, redBoxMaterial);
-    baseMesh.position.y = -boxH / 2 + 0.45;
+    const baseMesh = new THREE.Mesh(baseGeom, solidRedBoxMaterial);
+    baseMesh.position.y = -boxH / 2 + 0.35;
     giftGroup.add(baseMesh);
 
-    // Ribbons wrapping Base along Z
+    // Solid Ribbons on Base (Z axis)
     const baseRibbonVGeom = new THREE.BoxGeometry(ribbonW, boxH + 0.002, boxD + ribbonThick * 2);
-    const baseRibbonVMesh = new THREE.Mesh(baseRibbonVGeom, darkObsidianRibbon);
+    const baseRibbonVMesh = new THREE.Mesh(baseRibbonVGeom, solidDarkRibbon);
     baseRibbonVMesh.position.copy(baseMesh.position);
     giftGroup.add(baseRibbonVMesh);
 
-    // Ribbons wrapping Base along X
+    // Solid Ribbons on Base (X axis)
     const baseRibbonHGeom = new THREE.BoxGeometry(boxW + ribbonThick * 2, boxH + 0.002, ribbonW);
-    const baseRibbonHMesh = new THREE.Mesh(baseRibbonHGeom, darkObsidianRibbon);
+    const baseRibbonHMesh = new THREE.Mesh(baseRibbonHGeom, solidDarkRibbon);
     baseRibbonHMesh.position.copy(baseMesh.position);
     giftGroup.add(baseRibbonHMesh);
 
-    // 2. Box Lid Group
+    // 2. Solid Box Lid
     const lidGroup = new THREE.Group();
-    const lidW = boxW + 0.09;
-    const lidH = 0.32;
-    const lidD = boxD + 0.09;
-    const lidPosY = baseMesh.position.y + boxH / 2 + lidH / 2 - 0.035;
+    const lidW = boxW + 0.08;
+    const lidH = 0.24;
+    const lidD = boxD + 0.08;
+    const lidPosY = baseMesh.position.y + boxH / 2 + lidH / 2 - 0.025;
     lidGroup.position.set(0, lidPosY, 0);
     giftGroup.add(lidGroup);
 
     const lidGeom = new THREE.BoxGeometry(lidW, lidH, lidD);
-    const lidMesh = new THREE.Mesh(lidGeom, redBoxMaterial);
+    const lidMesh = new THREE.Mesh(lidGeom, solidRedBoxMaterial);
     lidGroup.add(lidMesh);
 
-    // Lid crossing ribbons
+    // Solid Ribbons crossing the Lid
     const lidRibbonVGeom = new THREE.BoxGeometry(ribbonW, lidH + 0.002, lidD + ribbonThick * 2);
-    const lidRibbonVMesh = new THREE.Mesh(lidRibbonVGeom, darkObsidianRibbon);
+    const lidRibbonVMesh = new THREE.Mesh(lidRibbonVGeom, solidDarkRibbon);
     lidGroup.add(lidRibbonVMesh);
 
     const lidRibbonHGeom = new THREE.BoxGeometry(lidW + ribbonThick * 2, lidH + 0.002, ribbonW);
-    const lidRibbonHMesh = new THREE.Mesh(lidRibbonHGeom, darkObsidianRibbon);
+    const lidRibbonHMesh = new THREE.Mesh(lidRibbonHGeom, solidDarkRibbon);
     lidGroup.add(lidRibbonHMesh);
 
-    // 3. Realistic 3D Bow Assembly on Lid (matching IMG_7599.png loops)
+    // 3. Compact Solid Bow on Lid
     const bowGroup = new THREE.Group();
-    bowGroup.position.set(0, lidH / 2 + 0.015, 0);
+    bowGroup.position.set(0, lidH / 2 + 0.01, 0);
     lidGroup.add(bowGroup);
 
-    // Center Gold Bead / Knot
-    const knotGeom = new THREE.SphereGeometry(0.16, 24, 24);
-    const knotMesh = new THREE.Mesh(knotGeom, goldKnotMaterial);
-    knotMesh.position.y = 0.08;
-    knotMesh.scale.set(1.1, 0.95, 1.1);
+    // Center Gold Knot Bead
+    const knotGeom = new THREE.SphereGeometry(0.12, 24, 24);
+    const knotMesh = new THREE.Mesh(knotGeom, solidGoldKnot);
+    knotMesh.position.y = 0.06;
+    knotMesh.scale.set(1.1, 0.9, 1.1);
     bowGroup.add(knotMesh);
 
-    // 4 Interlocking ribbon loops as in the screenshot
-    const createCurvedLoop = (angleY: number, tiltX: number = 0.48) => {
-      const loopGeom = new THREE.TorusGeometry(0.28, 0.065, 18, 36, Math.PI * 1.55);
-      const loopMesh = new THREE.Mesh(loopGeom, darkObsidianRibbon);
+    // Small interlocking solid loops
+    const createCurvedLoop = (angleY: number, tiltX: number = 0.46) => {
+      const loopGeom = new THREE.TorusGeometry(0.2, 0.048, 16, 32, Math.PI * 1.55);
+      const loopMesh = new THREE.Mesh(loopGeom, solidDarkRibbon);
       loopMesh.rotation.y = angleY;
       loopMesh.rotation.x = tiltX;
-      loopMesh.position.set(Math.cos(angleY) * 0.12, 0.18, Math.sin(angleY) * 0.12);
+      loopMesh.position.set(Math.cos(angleY) * 0.09, 0.13, Math.sin(angleY) * 0.09);
       bowGroup.add(loopMesh);
       return loopMesh;
     };
 
-    createCurvedLoop(0, 0.42);
-    createCurvedLoop(Math.PI / 2, 0.42);
-    createCurvedLoop(Math.PI, 0.42);
-    createCurvedLoop((3 * Math.PI) / 2, 0.42);
+    createCurvedLoop(0, 0.4);
+    createCurvedLoop(Math.PI / 2, 0.4);
+    createCurvedLoop(Math.PI, 0.4);
+    createCurvedLoop((3 * Math.PI) / 2, 0.4);
+    createCurvedLoop(Math.PI / 4, 0.52);
+    createCurvedLoop((3 * Math.PI) / 4, 0.52);
+    createCurvedLoop((5 * Math.PI) / 4, 0.52);
+    createCurvedLoop((7 * Math.PI) / 4, 0.52);
 
-    // Diagonal smaller inner loops for full volume
-    createCurvedLoop(Math.PI / 4, 0.55);
-    createCurvedLoop((3 * Math.PI) / 4, 0.55);
-    createCurvedLoop((5 * Math.PI) / 4, 0.55);
-    createCurvedLoop((7 * Math.PI) / 4, 0.55);
-
-    // 4. Contact Shadow underneath (soft and realistic, no white glow)
+    // 4. Firm Solid Contact Shadow underneath
     const shadowCanvas = document.createElement('canvas');
     shadowCanvas.width = 256;
     shadowCanvas.height = 256;
     const sCtx = shadowCanvas.getContext('2d');
     if (sCtx) {
-      const grad = sCtx.createRadialGradient(128, 128, 10, 128, 128, 115);
-      grad.addColorStop(0, 'rgba(0, 0, 0, 0.95)');
-      grad.addColorStop(0.35, 'rgba(12, 1, 3, 0.6)');
-      grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.15)');
+      const grad = sCtx.createRadialGradient(128, 128, 8, 128, 128, 110);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0.96)');
+      grad.addColorStop(0.35, 'rgba(10, 1, 2, 0.65)');
+      grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.18)');
       grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       sCtx.fillStyle = grad;
       sCtx.fillRect(0, 0, 256, 256);
     }
     const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
-    const shadowGeom = new THREE.PlaneGeometry(3.2, 3.2);
+    const shadowGeom = new THREE.PlaneGeometry(2.4, 2.4);
     const shadowMat = new THREE.MeshBasicMaterial({
       map: shadowTexture,
       transparent: true,
@@ -200,16 +190,16 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
     });
     const shadowMesh = new THREE.Mesh(shadowGeom, shadowMat);
     shadowMesh.rotation.x = -Math.PI / 2;
-    shadowMesh.position.y = baseMesh.position.y - boxH / 2 - 0.02;
+    shadowMesh.position.y = baseMesh.position.y - boxH / 2 - 0.015;
     scene.add(shadowMesh);
 
-    // 5. Internal Warm Golden Glow Light (illuminates scene when opening)
-    const innerLight = new THREE.PointLight(0xFFA000, 0, 14, 2);
-    innerLight.position.set(0, baseMesh.position.y + 0.3, 0);
+    // 5. Internal Warm Golden Glow Light (for opening)
+    const innerLight = new THREE.PointLight(0xFFA000, 0, 12, 2);
+    innerLight.position.set(0, baseMesh.position.y + 0.2, 0);
     scene.add(innerLight);
 
-    // 6. Ambient Red & Golden Micro-Sparkles
-    const particleCount = 80;
+    // 6. Subtle Ambient Micro-Sparkles
+    const particleCount = 70;
     const particleGeom = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -220,16 +210,16 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 7.5;
-      positions[i3 + 1] = (Math.random() - 0.5) * 5.5;
-      positions[i3 + 2] = (Math.random() - 0.5) * 5.5;
+      positions[i3] = (Math.random() - 0.5) * 7;
+      positions[i3 + 1] = (Math.random() - 0.5) * 5;
+      positions[i3 + 2] = (Math.random() - 0.5) * 5;
 
       const pickColor = Math.random() > 0.4 ? redSparkle : goldSparkle;
       colors[i3] = pickColor.r;
       colors[i3 + 1] = pickColor.g;
       colors[i3 + 2] = pickColor.b;
 
-      particleSpeeds[i] = 0.2 + Math.random() * 0.45;
+      particleSpeeds[i] = 0.2 + Math.random() * 0.4;
     }
     particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -249,11 +239,11 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
     const pTexture = new THREE.CanvasTexture(pCanvas);
 
     const particleMat = new THREE.PointsMaterial({
-      size: 0.11,
+      size: 0.1,
       map: pTexture,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.75,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -261,22 +251,22 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
     scene.add(particleSystem);
 
     // --- Studio Lighting Architecture ---
-    const ambientLight = new THREE.AmbientLight(0x28050b, 1.8);
+    const ambientLight = new THREE.AmbientLight(0x2a060d, 1.8);
     scene.add(ambientLight);
 
-    // Warm Directional Key Light from Top-Front
-    const keyLight = new THREE.DirectionalLight(0xFFE5D9, 2.7);
-    keyLight.position.set(3.5, 5.5, 4.2);
+    // Warm Directional Key Light
+    const keyLight = new THREE.DirectionalLight(0xFFEADB, 2.6);
+    keyLight.position.set(3.2, 5.2, 3.8);
     scene.add(keyLight);
 
-    // Rim Highlight Light for rich 3D contour definition
-    const rimLight = new THREE.PointLight(0xFF1744, 2.8, 11, 1.6);
-    rimLight.position.set(-3.5, 3.2, -3);
+    // Sharp Rim Highlight Light for clear 3D edges
+    const rimLight = new THREE.PointLight(0xFF1744, 2.6, 10, 1.8);
+    rimLight.position.set(-3.2, 2.8, -2.8);
     scene.add(rimLight);
 
     // Gentle roving specular point light
-    const movingLight = new THREE.PointLight(0xFFC107, 1.3, 7, 2);
-    movingLight.position.set(1.5, 2.5, 2.5);
+    const movingLight = new THREE.PointLight(0xFFC107, 1.2, 6, 2);
+    movingLight.position.set(1.4, 2.2, 2.2);
     scene.add(movingLight);
 
     // --- Cursor & Touch Parallax ---
@@ -286,8 +276,8 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
     const onPointerMove = (e: MouseEvent) => {
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
       const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-      targetRotation.y = 0.38 + normX * 0.32;
-      targetRotation.x = 0.14 - normY * 0.16;
+      targetRotation.y = 0.38 + normX * 0.28;
+      targetRotation.x = 0.14 - normY * 0.14;
     };
 
     const onTouchMove = (e: TouchEvent) => {
@@ -295,8 +285,8 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
         const touch = e.touches[0];
         const normX = (touch.clientX / window.innerWidth) * 2 - 1;
         const normY = -(touch.clientY / window.innerHeight) * 2 + 1;
-        targetRotation.y = 0.38 + normX * 0.32;
-        targetRotation.x = 0.14 - normY * 0.16;
+        targetRotation.y = 0.38 + normX * 0.28;
+        targetRotation.x = 0.14 - normY * 0.14;
       }
     };
 
@@ -309,7 +299,7 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
       const h = container.clientHeight || window.innerHeight;
       const mobile = w < 768;
       camera.aspect = w / h;
-      camera.position.z = mobile ? 6.6 : 5.6;
+      camera.position.z = mobile ? 6.2 : 5.4;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
@@ -330,18 +320,18 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
       const posArray = posAttr.array as Float32Array;
       for (let i = 0; i < particleCount; i++) {
         const idx = i * 3 + 1;
-        posArray[idx] += 0.0022 * particleSpeeds[i];
-        if (posArray[idx] > 3.0) {
-          posArray[idx] = -2.5;
+        posArray[idx] += 0.002 * particleSpeeds[i];
+        if (posArray[idx] > 2.8) {
+          posArray[idx] = -2.2;
         }
       }
       posAttr.needsUpdate = true;
-      particleSystem.rotation.y = elapsed * 0.03;
+      particleSystem.rotation.y = elapsed * 0.025;
 
       // Subtle moving specular light
-      movingLight.position.x = Math.sin(elapsed * 1.1) * 3.0;
-      movingLight.position.y = 2.0 + Math.cos(elapsed * 1.4) * 1.0;
-      movingLight.position.z = Math.cos(elapsed * 1.1) * 3.0;
+      movingLight.position.x = Math.sin(elapsed * 1.1) * 2.8;
+      movingLight.position.y = 1.8 + Math.cos(elapsed * 1.4) * 0.8;
+      movingLight.position.z = Math.cos(elapsed * 1.1) * 2.8;
 
       // Slerp rotation
       currentRotation.y += (targetRotation.y - currentRotation.y) * 0.05;
@@ -358,7 +348,7 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
 
         // 1. Gentle Anticipation
         if (openProgress < 0.35) {
-          const shake = Math.sin(openProgress * 40) * 0.015 * (1 - openProgress / 0.35);
+          const shake = Math.sin(openProgress * 40) * 0.012 * (1 - openProgress / 0.35);
           giftGroup.position.x = shake;
           giftGroup.scale.set(1.01, 0.98 + Math.sin(openProgress * 20) * 0.02, 1.01);
         } else {
@@ -375,12 +365,12 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
           const lidProg = THREE.MathUtils.clamp((openProgress - 0.4) / 1.3, 0, 1);
           const easeLid = 1 - Math.pow(1 - lidProg, 3);
 
-          lidGroup.position.y = lidPosY + easeLid * 3.0;
-          lidGroup.position.z = -easeLid * 0.65;
-          lidGroup.rotation.x = -easeLid * 0.5;
+          lidGroup.position.y = lidPosY + easeLid * 2.4;
+          lidGroup.position.z = -easeLid * 0.55;
+          lidGroup.rotation.x = -easeLid * 0.45;
 
-          // Warm golden light emerges from inside (no white flash)
-          innerLight.intensity = easeLid * 15;
+          // Warm golden light emerges from inside
+          innerLight.intensity = easeLid * 14;
           ambientLight.intensity = 1.8 + easeLid * 1.2;
         }
 
@@ -390,7 +380,7 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
           soundEffects.playConfettiBurst();
 
           confetti({
-            particleCount: 95,
+            particleCount: 90,
             spread: 80,
             origin: { y: 0.52, x: 0.5 },
             colors: ['#D32F2F', '#FF1744', '#FFD54F', '#FFF9C4', '#FFFFFF'],
@@ -402,7 +392,7 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
 
           setTimeout(() => {
             confetti({
-              particleCount: 50,
+              particleCount: 45,
               spread: 60,
               origin: { y: 0.55, x: 0.4 },
               colors: ['#FF1744', '#FFD54F', '#FFFFFF'],
@@ -411,7 +401,7 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
               zIndex: 9999,
             });
             confetti({
-              particleCount: 50,
+              particleCount: 45,
               spread: 60,
               origin: { y: 0.55, x: 0.6 },
               colors: ['#D32F2F', '#FFD54F', '#E2E8F0'],
@@ -430,11 +420,11 @@ export const ThreeGiftBox: React.FC<ThreeGiftBoxProps> = ({
 
         giftGroup.rotation.y = currentRotation.y + openProgress * 0.25;
       } else {
-        // Idle Motion: gentle breathing and floating
-        const floatY = Math.sin(elapsed * 1.6) * 0.045;
-        const subtleTilt = Math.sin(elapsed * 1.1) * 0.02;
+        // Idle Motion: gentle subtle breathing and floating
+        const floatY = Math.sin(elapsed * 1.6) * 0.038;
+        const subtleTilt = Math.sin(elapsed * 1.1) * 0.018;
         giftGroup.position.y = -0.05 + floatY;
-        giftGroup.rotation.y = currentRotation.y + Math.sin(elapsed * 0.7) * 0.06;
+        giftGroup.rotation.y = currentRotation.y + Math.sin(elapsed * 0.7) * 0.05;
         giftGroup.rotation.x = currentRotation.x + subtleTilt;
 
         shadowMesh.scale.setScalar(1 - floatY * 0.25);
